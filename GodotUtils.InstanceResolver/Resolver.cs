@@ -1,13 +1,12 @@
 using Godot;
 using GodotUtils.InstanceResolver.Internal;
-using System;
 
 namespace GodotUtils.InstanceResolver;
 
 public static class Resolver
 {
     public static TNode Init<TNode>(this PackedScene packedScene)
-        where TNode : Node, INoParamsResolveNode<TNode>
+        where TNode : Node, INoParamsResolveNode
     {
         return packedScene.Instantiate<TNode>();
     }
