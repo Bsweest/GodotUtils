@@ -1,4 +1,3 @@
-using GodotUtils.InstanceResolver.Generators.Components;
 using GodotUtils.InstanceResolver.Generators.Extensions;
 using GodotUtils.InstanceResolver.Generators.Helper;
 using Microsoft.CodeAnalysis;
@@ -20,7 +19,7 @@ internal sealed partial record HierarchyInfo(
     /// <returns>A <see cref="HierarchyInfo"/> instance describing <paramref name="typeSymbol"/>.</returns>
     public static HierarchyInfo From(INamedTypeSymbol typeSymbol)
     {
-        using ImmutableArrayBuilder<TypeInfor> hierarchy = ImmutableArrayBuilder<TypeInfor>.Rent();
+        using var hierarchy = ImmutableArrayBuilder<TypeInfor>.Rent();
 
         for (
             INamedTypeSymbol? parent = typeSymbol;

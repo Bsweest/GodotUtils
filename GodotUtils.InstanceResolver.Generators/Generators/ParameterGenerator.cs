@@ -31,14 +31,8 @@ public partial class ParameterGenerators : IIncrementalGenerator
                     },
                 static (context, token) =>
                 {
-                    if (
-                        !context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
-                            LanguageVersion.CSharp8
-                        )
-                    )
-                    {
+                    if (!context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(LanguageVersion.CSharp8))
                         return default;
-                    }
 
                     FieldDeclarationSyntax fieldDeclaration = (FieldDeclarationSyntax)
                         context.TargetNode.Parent!.Parent!;
@@ -50,9 +44,8 @@ public partial class ParameterGenerators : IIncrementalGenerator
                     token.ThrowIfCancellationRequested();
 
                     _ = Execute.TryGetInfo(
-                        fieldDeclaration,
+                        context.Attributes[0],
                         fieldSymbol,
-                        context.SemanticModel,
                         token,
                         out PropertyInfo? propertyInfo,
                         out ImmutableArray<DiagnosticInfo> diagnostics

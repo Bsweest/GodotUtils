@@ -18,9 +18,8 @@ partial class ParameterGenerators
     private static class Execute
     {
         public static bool TryGetInfo(
-            FieldDeclarationSyntax fieldSyntax,
+            AttributeData attributeData,
             IFieldSymbol fieldSymbol,
-            SemanticModel semanticModel,
             CancellationToken token,
             out PropertyInfo? propertyInfo,
             out ImmutableArray<DiagnosticInfo> diagnostics
@@ -50,10 +49,21 @@ partial class ParameterGenerators
             string fieldName = fieldSymbol.Name;
             string propertyName = GetGeneratedPropertyName(fieldSymbol);
 
+            bool isRequired = true;
+            foreach (bool? dependentIsRequired in attributeData.GetConstructorArguments<bool>())
+            {
+                if (dependentIsRequired is bool boolValue)
+                {
+                    isRequired = boolValue;
+                    break;
+                }
+            }
+
             propertyInfo = new PropertyInfo(
                 typeNameWithNullabilityAnnotations,
                 fieldName,
-                propertyName
+                propertyName,
+                new(isRequired)
             );
             diagnostics = builder.ToImmutable();
 
@@ -77,8 +87,13 @@ partial class ParameterGenerators
                 propertyInfo.TypeNameWithNullabilityAnnotations
             );
 
+            SyntaxToken[] modifierTokens = [Token(SyntaxKind.PublicKeyword)];
+
+            if (propertyInfo.AttributeInfo.IsRequired)
+                modifierTokens = [.. modifierTokens, Token(SyntaxKind.RequiredKeyword)];
+
             return PropertyDeclaration(propertyType, Identifier(propertyInfo.PropertyName))
-                .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                .AddModifiers(modifierTokens)
                 .AddAccessorListAccessors(
                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                         .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
