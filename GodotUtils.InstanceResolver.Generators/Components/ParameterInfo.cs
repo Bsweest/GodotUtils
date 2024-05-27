@@ -1,3 +1,5 @@
-﻿namespace GodotUtils.InstanceResolver.Generators.Components;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-internal sealed record ParameterInfo(bool IsRequired);
+namespace GodotUtils.InstanceResolver.Generators.Components;
+
+internal sealed record ParameterInfo(EqualsValueClauseSyntax? Value);

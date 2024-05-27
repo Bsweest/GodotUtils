@@ -49,28 +49,22 @@ partial class ParameterGenerators
             string fieldName = fieldSymbol.Name;
             string propertyName = GetGeneratedPropertyName(fieldSymbol);
 
-            bool isRequired = true;
-            foreach (bool? dependentIsRequired in attributeData.GetConstructorArguments<bool>())
-            {
-                if (dependentIsRequired is bool boolValue)
-                {
-                    isRequired = boolValue;
-                    break;
-                }
-            }
+            var paramInfo = GetParameterInfo(fieldSymbol);
+
+            token.ThrowIfCancellationRequested();
 
             propertyInfo = new PropertyInfo(
                 typeNameWithNullabilityAnnotations,
                 fieldName,
                 propertyName,
-                new(isRequired)
+                paramInfo
             );
             diagnostics = builder.ToImmutable();
 
             return true;
         }
 
-        public static string GetGeneratedPropertyName(IFieldSymbol fieldSymbol)
+        private static string GetGeneratedPropertyName(IFieldSymbol fieldSymbol)
         {
             string propertyName = fieldSymbol.Name;
             if (propertyName.StartsWith('_'))
@@ -81,28 +75,44 @@ partial class ParameterGenerators
             return $"{char.ToUpper(propertyName[0], CultureInfo.InvariantCulture)}{propertyName[1..]}";
         }
 
+        private static ParameterInfo GetParameterInfo(IFieldSymbol fieldSymbol)
+        {
+            var equalSyntax = fieldSymbol.DeclaringSyntaxReferences[0].GetSyntax() switch
+            {
+                PropertyDeclarationSyntax property => property.Initializer,
+                VariableDeclaratorSyntax variable => variable.Initializer,
+                _ => null,
+            };
+
+            return new(equalSyntax);
+        }
+
         public static MemberDeclarationSyntax GetPropertySyntax(PropertyInfo propertyInfo)
         {
             TypeSyntax propertyType = IdentifierName(
                 propertyInfo.TypeNameWithNullabilityAnnotations
             );
 
-            SyntaxToken[] modifierTokens = [Token(SyntaxKind.PublicKeyword)];
-
-            if (propertyInfo.AttributeInfo.IsRequired)
-                modifierTokens = [.. modifierTokens, Token(SyntaxKind.RequiredKeyword)];
-
-            return PropertyDeclaration(propertyType, Identifier(propertyInfo.PropertyName))
-                .AddModifiers(modifierTokens)
+            var declaration = PropertyDeclaration(propertyType, Identifier(propertyInfo.PropertyName))
+                .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddAccessorListAccessors(
                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                         .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
                     AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
                         .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                 );
+
+            if (propertyInfo.AttributeInfo.Value is EqualsValueClauseSyntax defaultValue)
+            {
+                declaration = declaration.WithInitializer(defaultValue).WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+            }
+            else
+                declaration = declaration.AddModifiers(Token(SyntaxKind.RequiredKeyword));
+
+            return declaration;
         }
 
-        internal static ExpressionStatementSyntax GetMapExpressionsSyntax(PropertyInfo info)
+        public static ExpressionStatementSyntax GetMapExpressionsSyntax(PropertyInfo info)
         {
             return ExpressionStatement(
                 AssignmentExpression(
