@@ -1,12 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="GodotSharp" Version="4.2.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\GodotUtils.InstanceResolver.Generators\GodotUtils.InstanceResolver.Generators.csproj" OutputItemType="Analyzer" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="$(OutputPath)/$(AssemblyName).Generators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 </Project>
