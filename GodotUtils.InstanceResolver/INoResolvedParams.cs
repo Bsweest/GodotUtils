@@ -1,3 +1,3 @@
 namespace GodotUtils.InstanceResolver;
 
-public interface IParamsResolveNode { }
+public interface INoResolvedParams { }

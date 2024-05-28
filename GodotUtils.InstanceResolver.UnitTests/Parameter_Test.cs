@@ -2,7 +2,7 @@
 
 namespace GodotUtils.InstanceResolver.UnitTests
 {
-    public partial class Parameter_Test : Godot.Node, IParamsResolveNode
+    public partial class Parameter_Test : Godot.Node, IHasResolvedParams
     {
         [Parameter]
         public string name = "test";
@@ -13,6 +13,6 @@ namespace GodotUtils.InstanceResolver.UnitTests
         private TextureRect textureRect = null!;
 
         [Parameter]
-        private string Test;
+        private string _test;
     }
 }

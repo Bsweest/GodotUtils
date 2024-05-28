@@ -3,8 +3,7 @@ namespace GodotUtils.InstanceResolver.Generators.Constants;
 internal static class ClassNameConst
 {
     private const string internalResolverNamespace = $"GodotUtils.InstanceResolver.Internal";
-    private const string resolvedNodeName = "IResolveNode";
-    private const string hasParamsName = "IHasParams";
+    private const string resolvedNodeName = "IResolvedNode";
     private const string paramsName = "IParameters";
 
     public const string BuildParametersClassName = "BuildParameters";
@@ -12,12 +11,7 @@ internal static class ClassNameConst
 
     public static string RequiredResolveInterface(string className)
     {
-        return $"{internalResolverNamespace}.{resolvedNodeName}<{className}>";
-    }
-
-    public static string RequiredHasParamInterface(string className)
-    {
-        return $"{internalResolverNamespace}.{hasParamsName}<{className}.{BuildParametersClassName}>";
+        return $"{internalResolverNamespace}.{resolvedNodeName}<{className}, {className}.{BuildParametersClassName}>";
     }
 
     public static string RequiredParamsInterface(string className)

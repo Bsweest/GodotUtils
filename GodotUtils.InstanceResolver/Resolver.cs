@@ -6,7 +6,7 @@ namespace GodotUtils.InstanceResolver;
 public static class Resolver
 {
     public static TNode Init<TNode>(this PackedScene packedScene)
-        where TNode : Node, INoParamsResolveNode
+        where TNode : Node, INoResolvedParams
     {
         return packedScene.Instantiate<TNode>();
     }
@@ -15,7 +15,7 @@ public static class Resolver
         this PackedScene packedScene,
         Func<TNode, IParameters<TNode>> requiredMappingFunction
     )
-        where TNode : Node, IResolveNode<TNode>
+        where TNode : Node, IHasResolvedParams
     {
         var node = packedScene.Instantiate<TNode>();
         requiredMappingFunction.Invoke(node);

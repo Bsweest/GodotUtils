@@ -1,7 +1,7 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using static GodotUtils.InstanceResolver.Generators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -34,9 +34,6 @@ partial record HierarchyInfo
             .AddBaseListTypes(
                 SimpleBaseType(
                     IdentifierName(RequiredResolveInterface(Hierarchy[0].QualifiedName))
-                ),
-                SimpleBaseType(
-                    IdentifierName(RequiredHasParamInterface(Hierarchy[0].QualifiedName))
                 )
             )
             .AddMembers(
