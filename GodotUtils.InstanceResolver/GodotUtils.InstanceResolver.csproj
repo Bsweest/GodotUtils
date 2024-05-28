@@ -5,6 +5,8 @@
 		<Nullable>enable</Nullable>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,5 +19,7 @@
 
 	<ItemGroup>
 		<None Include="$(OutputPath)/$(AssemblyName).Generators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
+		<None Include="..\LICENSE" Pack="true" PackagePath="LICENSE"/>
+		<None Include="..\README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 </Project>
