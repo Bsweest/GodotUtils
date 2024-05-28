@@ -19,7 +19,7 @@
 
 	<ItemGroup>
 		<None Include="$(OutputPath)/$(AssemblyName).Generators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
-		<None Include="..\LICENSE" Pack="true" PackagePath="LICENSE"/>
+		<None Include="..\LICENSE" Pack="true" PackagePath="\"/>
 		<None Include="..\README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 </Project>
