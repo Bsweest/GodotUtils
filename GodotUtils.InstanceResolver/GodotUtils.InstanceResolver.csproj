@@ -3,23 +3,28 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<IncludeBuildOutput>false</IncludeBuildOutput>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<Version>1.0.1</Version>
+		<Authors>Bsweest</Authors>
+		<Product>Godot Utilities</Product>
+		<Description>Godot utility package for a convenience way to resolve node scene reliably</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="GodotSharp" Version="4.2.2" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
-	  <ProjectReference Include="..\GodotUtils.InstanceResolver.Generators\GodotUtils.InstanceResolver.Generators.csproj" OutputItemType="Analyzer" />
+		<None Include="..\LICENSE" Pack="true" PackagePath="\" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="$(OutputPath)/$(AssemblyName).Generators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
-		<None Include="..\LICENSE" Pack="true" PackagePath="\"/>
-		<None Include="..\README.md" Pack="true" PackagePath="\"/>
+		<None Include="..\$(AssemblyName).Generators\bin\$(Configuration)\net8.0\$(AssemblyName).Generators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 </Project>
