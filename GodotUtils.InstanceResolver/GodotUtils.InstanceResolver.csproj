@@ -9,10 +9,14 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
 		<Authors>Bsweest</Authors>
 		<Product>Godot Utilities</Product>
 		<Description>Godot utility package for a convenience way to resolve node scene reliably</Description>
+		<Title>GodotUtils.InstanceResolver</Title>
+		<RepositoryUrl>https://github.com/Bsweest/GodotUtils.InstanceResolver</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>godot;utilities;resolver</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>

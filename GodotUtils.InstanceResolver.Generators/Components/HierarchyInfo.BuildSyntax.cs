@@ -11,7 +11,7 @@ partial record HierarchyInfo
 {
     public CompilationUnitSyntax GetCompilationUnit(
         ImmutableArray<MemberDeclarationSyntax> memberDeclarations,
-        ImmutableArray<ExpressionStatementSyntax> expressionStatementSyntaxes,
+        ImmutableArray<StatementSyntax> expressionStatementSyntaxes,
         BaseListSyntax? baseList = null
     )
     {

@@ -1,7 +1,10 @@
-﻿namespace GodotUtils.InstanceResolver.UnitTests
+﻿namespace TestNamespace
 {
-    public partial class Test : Godot.Node, INoResolvedParams
+    public partial class Test
     {
-
+        public class Inside
+        {
+            public const string Z = "dsad";
+        }
     }
 }

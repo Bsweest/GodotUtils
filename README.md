@@ -37,14 +37,29 @@ partial class Bullet : GodotUtils.InstanceResolver.IResolvedNode<Bullet, Bullet.
     public class BuildParameters
     {
         public required int Damage { get; init; }
-        public int Speed { get; init; } = 100;
+
+        public readonly GodotUtils.InstanceResolver.Internal.Models.OptionalValue<int> _speedWrapper = new();
+        public int Speed
+        {
+            get => _speedWrapper.Value;
+            init
+            {
+                _speedWrapper.Set(value);
+            }
+        }
+
         public required global::Godot.Texture Texture { get; init; }
     }
 
     public BuildParameters Map(BuildParameters parameters)
     {
         _damage = parameters.Damage;
-        _speed = parameters.Speed;
+
+        if (parameters._speedWrapper.IsInitialized)
+        {
+            _speed = parameters.Speed;
+        }
+
         _texture = parameters.Texture;
     }
 }

@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Threading;
 using GodotUtils.InstanceResolver.Generators.Components;
 using GodotUtils.InstanceResolver.Generators.Diagnostics;
 using GodotUtils.InstanceResolver.Generators.Extensions;
@@ -5,9 +8,6 @@ using GodotUtils.InstanceResolver.Generators.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.Threading;
 using static GodotUtils.InstanceResolver.Generators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -56,6 +56,7 @@ partial class ParameterGenerators
             propertyInfo = new PropertyInfo(
                 typeNameWithNullabilityAnnotations,
                 fieldName,
+                $"{fieldName}Wrapper",
                 propertyName,
                 paramInfo
             );
@@ -84,37 +85,91 @@ partial class ParameterGenerators
                 _ => null,
             };
 
-            return new(equalSyntax);
+            return new(equalSyntax == null);
         }
 
-        public static MemberDeclarationSyntax GetPropertySyntax(PropertyInfo propertyInfo)
+        public static MemberDeclarationSyntax[] GetPropertySyntax(PropertyInfo propertyInfo)
         {
             TypeSyntax propertyType = IdentifierName(
                 propertyInfo.TypeNameWithNullabilityAnnotations
             );
 
-            var declaration = PropertyDeclaration(propertyType, Identifier(propertyInfo.PropertyName))
-                .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                .AddAccessorListAccessors(
-                    AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
-                    AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
-                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
-                );
+            MemberDeclarationSyntax[] members = [];
 
-            if (propertyInfo.AttributeInfo.Value is EqualsValueClauseSyntax defaultValue)
+            var getter = AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+            var initer = AccessorDeclaration(SyntaxKind.InitAccessorDeclaration);
+
+            var declaration = PropertyDeclaration(
+                    propertyType,
+                    Identifier(propertyInfo.PropertyName)
+                )
+                .AddModifiers(Token(SyntaxKind.PublicKeyword));
+
+            if (propertyInfo.AttributeInfo.IsRequired)
             {
-                declaration = declaration.WithInitializer(defaultValue).WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+                declaration = declaration.AddModifiers(Token(SyntaxKind.RequiredKeyword));
+                initer = initer.WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
             }
             else
-                declaration = declaration.AddModifiers(Token(SyntaxKind.RequiredKeyword));
+            {
+                members =
+                [
+                    FieldDeclaration(
+                            VariableDeclaration(
+                                    IdentifierName(
+                                        OptionalValueField(
+                                            propertyInfo.TypeNameWithNullabilityAnnotations
+                                        )
+                                    )
+                                )
+                                .AddVariables(
+                                    VariableDeclarator(Identifier(propertyInfo.WrapperName))
+                                        .WithInitializer(
+                                            EqualsValueClause(ImplicitObjectCreationExpression())
+                                        )
+                                )
+                        )
+                        .AddModifiers(
+                            Token(SyntaxKind.PublicKeyword),
+                            Token(SyntaxKind.ReadOnlyKeyword)
+                        )
+                ];
 
-            return declaration;
+                getter = getter.WithExpressionBody(
+                    ArrowExpressionClause(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName(propertyInfo.WrapperName),
+                            IdentifierName(GetValue)
+                        )
+                    )
+                );
+
+                initer = initer.AddBodyStatements(
+                    ExpressionStatement(
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName(propertyInfo.WrapperName),
+                                    IdentifierName(SetValue)
+                                )
+                            )
+                            .AddArgumentListArguments(Argument(IdentifierName(ValueKeyword)))
+                    )
+                );
+            }
+
+            declaration = declaration.AddAccessorListAccessors(getter, initer);
+
+            members = [.. members, declaration];
+
+            return members;
         }
 
-        public static ExpressionStatementSyntax GetMapExpressionsSyntax(PropertyInfo info)
+        public static StatementSyntax GetMapExpressionsSyntax(PropertyInfo info)
         {
-            return ExpressionStatement(
+            StatementSyntax expression = ExpressionStatement(
                 AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
                     IdentifierName(info.FieldName),
@@ -125,6 +180,24 @@ partial class ParameterGenerators
                     )
                 )
             );
+
+            if (!info.AttributeInfo.IsRequired)
+            {
+                expression = IfStatement(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName(PassingObj),
+                            IdentifierName(info.WrapperName)
+                        ),
+                        IdentifierName(IsInitialized)
+                    ),
+                    Block(expression)
+                );
+            }
+
+            return expression;
         }
     }
 }

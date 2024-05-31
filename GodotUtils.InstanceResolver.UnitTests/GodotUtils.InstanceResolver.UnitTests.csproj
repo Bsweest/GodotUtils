@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GodotUtils.InstanceResolver.Generators\GodotUtils.InstanceResolver.Generators.csproj" 
-					  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="xunit" Version="2.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GodotUtils.InstanceResolver.Generators\GodotUtils.InstanceResolver.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\GodotUtils.InstanceResolver\GodotUtils.InstanceResolver.csproj" />
   </ItemGroup>
 

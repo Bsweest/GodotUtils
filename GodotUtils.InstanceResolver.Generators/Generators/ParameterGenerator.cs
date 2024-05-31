@@ -14,6 +14,8 @@ public partial class ParameterGenerators : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        //if (!Debugger.IsAttached) Debugger.Launch();
+
         IncrementalValuesProvider<(
             HierarchyInfo Hierarchy,
             Result<PropertyInfo?> Info
@@ -84,10 +86,10 @@ public partial class ParameterGenerators : IIncrementalGenerator
             {
                 // Generate all member declarations for the current type
                 ImmutableArray<MemberDeclarationSyntax> memberDeclarations = item
-                    .Properties.Select(Execute.GetPropertySyntax)
+                    .Properties.SelectMany(Execute.GetPropertySyntax)
                     .ToImmutableArray();
 
-                ImmutableArray<ExpressionStatementSyntax> expressionStatementSyntaxes = item
+                ImmutableArray<StatementSyntax> expressionStatementSyntaxes = item
                     .Properties.Select(Execute.GetMapExpressionsSyntax)
                     .ToImmutableArray();
 

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GeneratorDebug": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\GodotUtils.InstanceResolver.UnitTests\\GodotUtils.InstanceResolver.UnitTests.csproj"
+    }
+  }
+}
