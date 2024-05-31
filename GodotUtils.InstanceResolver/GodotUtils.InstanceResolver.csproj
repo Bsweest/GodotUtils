@@ -9,7 +9,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>Bsweest</Authors>
 		<Product>Godot Utilities</Product>
 		<Description>Godot utility package for a convenience way to resolve node scene reliably</Description>

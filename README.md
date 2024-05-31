@@ -34,11 +34,12 @@ namespace YourGame.Components;
 
 partial class Bullet : GodotUtils.InstanceResolver.IResolvedNode<Bullet, Bullet.BuildParameters>
 {
-    public class BuildParameters
+    public class BuildParameters : GodotUtils.InstanceResolver.Internal.IParameters<Bullet>
     {
         public required int Damage { get; init; }
 
-        public readonly GodotUtils.InstanceResolver.Internal.Models.OptionalValue<int> _speedWrapper = new();
+        private readonly GodotUtils.InstanceResolver.Internal.Models.OptionalValue<int> _speedWrapper = new();
+        public bool IsSpeedInitialized() => _speedWrapper.IsInitialized;
         public int Speed
         {
             get => _speedWrapper.Value;
@@ -55,7 +56,7 @@ partial class Bullet : GodotUtils.InstanceResolver.IResolvedNode<Bullet, Bullet.
     {
         _damage = parameters.Damage;
 
-        if (parameters._speedWrapper.IsInitialized)
+        if (parameters.IsSpeedInitialized())
         {
             _speed = parameters.Speed;
         }

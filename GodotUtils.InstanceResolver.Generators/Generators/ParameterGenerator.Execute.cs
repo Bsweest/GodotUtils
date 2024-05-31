@@ -1,6 +1,3 @@
-using System.Collections.Immutable;
-using System.Globalization;
-using System.Threading;
 using GodotUtils.InstanceResolver.Generators.Components;
 using GodotUtils.InstanceResolver.Generators.Diagnostics;
 using GodotUtils.InstanceResolver.Generators.Extensions;
@@ -8,6 +5,9 @@ using GodotUtils.InstanceResolver.Generators.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Threading;
 using static GodotUtils.InstanceResolver.Generators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -93,6 +93,7 @@ partial class ParameterGenerators
             TypeSyntax propertyType = IdentifierName(
                 propertyInfo.TypeNameWithNullabilityAnnotations
             );
+            var wrapperName = IdentifierName(propertyInfo.WrapperName);
 
             MemberDeclarationSyntax[] members = [];
 
@@ -131,16 +132,31 @@ partial class ParameterGenerators
                                 )
                         )
                         .AddModifiers(
-                            Token(SyntaxKind.PublicKeyword),
+                            Token(SyntaxKind.PrivateKeyword),
                             Token(SyntaxKind.ReadOnlyKeyword)
+                        ),
+                    MethodDeclaration(
+                            PredefinedType(Token(SyntaxKind.BoolKeyword)),
+                            Identifier($"Is{propertyInfo.PropertyName}Initialized")
                         )
+                        .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                        .WithExpressionBody(
+                            ArrowExpressionClause(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    wrapperName,
+                                    IdentifierName(IsInitialized)
+                                )
+                            )
+                        )
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                 ];
 
                 getter = getter.WithExpressionBody(
                     ArrowExpressionClause(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName(propertyInfo.WrapperName),
+                            wrapperName,
                             IdentifierName(GetValue)
                         )
                     )
@@ -151,7 +167,7 @@ partial class ParameterGenerators
                         InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName(propertyInfo.WrapperName),
+                                    wrapperName,
                                     IdentifierName(SetValue)
                                 )
                             )
@@ -184,14 +200,12 @@ partial class ParameterGenerators
             if (!info.AttributeInfo.IsRequired)
             {
                 expression = IfStatement(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
+                    InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             IdentifierName(PassingObj),
-                            IdentifierName(info.WrapperName)
-                        ),
-                        IdentifierName(IsInitialized)
+                            IdentifierName($"Is{info.PropertyName}Initialized")
+                        )
                     ),
                     Block(expression)
                 );
