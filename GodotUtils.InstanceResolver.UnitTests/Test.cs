@@ -1,10 +1,7 @@
-﻿namespace TestNamespace
+﻿namespace GodotUtils.InstanceResolver.UnitTests
 {
-    public partial class Test
+    internal static class Test
     {
-        public class Inside
-        {
-            public const string Z = "dsad";
-        }
+
     }
 }

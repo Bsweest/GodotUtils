@@ -3,7 +3,7 @@ using Godot;
 namespace GodotUtils.InstanceResolver.Internal;
 
 public interface IResolvedNode<TNode, TParams>
-    where TParams : IParameters<TNode>
+    where TParams : IParametersBuilder<TNode>
     where TNode : Node
 {
     TParams Map(TParams parameters);

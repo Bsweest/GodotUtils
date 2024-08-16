@@ -1,4 +1,0 @@
-﻿namespace GodotUtils.InstanceResolver.UnitTests
-{
-
-}
