@@ -1,6 +1,6 @@
 using Godot;
 
-namespace GodotUtils.InstanceResolver.Internal;
+namespace GodotUtils.InstanceResolver.__Internal;
 
 public interface IResolvableNode<TNode, TParams>
     where TNode : Node

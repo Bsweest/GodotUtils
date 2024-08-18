@@ -5,6 +5,7 @@ using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Diagnostics;
 using GodotUtils.InstanceResolver.SourceGenerators.Extensions;
 using GodotUtils.InstanceResolver.SourceGenerators.Helper;
+using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace GodotUtils.InstanceResolver.SourceGenerators;
 
-partial class ParameterGenerators
+partial class ResolvableNodeGenerators
 {
     private static class Execute
     {

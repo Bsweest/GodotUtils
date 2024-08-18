@@ -1,6 +1,6 @@
-using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Extensions;
 using GodotUtils.InstanceResolver.SourceGenerators.Helper;
+using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 using static Microsoft.CodeAnalysis.SymbolDisplayTypeQualificationStyle;
 

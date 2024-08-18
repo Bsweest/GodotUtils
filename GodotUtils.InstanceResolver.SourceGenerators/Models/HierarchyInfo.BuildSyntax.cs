@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,15 +17,6 @@ partial record HierarchyInfo
     )
     {
         var className = Hierarchy[0].QualifiedName;
-        BaseTypeSyntax[] selectedInterfaces =
-            (expressionStatementSyntaxes.Length > 0)
-                ?
-                [
-                    SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
-                    SimpleBaseType(IdentifierName(HasParamsInterface))
-                ]
-                : [SimpleBaseType(IdentifierName(NoParamsInterface))];
-
         // Create the partial type declaration with the given member declarations.
         // This code produces a class declaration as follows:
         //
@@ -41,7 +33,10 @@ partial record HierarchyInfo
             (ClassDeclarationSyntax)
                 Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
         )
-            .AddBaseListTypes(selectedInterfaces)
+            .AddBaseListTypes(
+                SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
+                SimpleBaseType(IdentifierName(HasParamsInterface))
+            )
             .AddMembers(
                 ClassDeclaration(BuildParametersClassName)
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))

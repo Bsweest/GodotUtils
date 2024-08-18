@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace GodotUtils.InstanceResolver.SourceGenerators.Components;
+namespace GodotUtils.InstanceResolver.SourceGenerators.Models;
 
 internal sealed record TypeInfor(string QualifiedName, TypeKind Kind, bool IsRecord)
 {

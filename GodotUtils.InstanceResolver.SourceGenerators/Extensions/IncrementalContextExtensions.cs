@@ -1,5 +1,5 @@
-using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Helper;
+using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 
 namespace GodotUtils.InstanceResolver.SourceGenerators.Extensions;

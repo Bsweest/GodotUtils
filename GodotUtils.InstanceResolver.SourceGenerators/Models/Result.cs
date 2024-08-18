@@ -1,7 +1,7 @@
-using GodotUtils.InstanceResolver.SourceGenerators.Helper;
 using System;
+using GodotUtils.InstanceResolver.SourceGenerators.Helper;
 
-namespace GodotUtils.InstanceResolver.SourceGenerators.Components;
+namespace GodotUtils.InstanceResolver.SourceGenerators.Models;
 
 /// <summary>
 /// A model representing a value and an associated set of diagnostic errors.

@@ -1,21 +1,48 @@
-﻿using GodotUtils.InstanceResolver.SourceGenerators.Components;
+﻿using System.Collections.Immutable;
+using System.Linq;
+using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Extensions;
 using GodotUtils.InstanceResolver.SourceGenerators.Helper;
+using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace GodotUtils.InstanceResolver.SourceGenerators;
 
 [Generator(LanguageNames.CSharp)]
-public partial class ParameterGenerators : IIncrementalGenerator
+public partial class ResolvableNodeGenerators : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        //if (!Debugger.IsAttached) Debugger.Launch();
+        if (!System.Diagnostics.Debugger.IsAttached)
+            System.Diagnostics.Debugger.Launch();
 
+        IncrementalValuesProvider<(
+            HierarchyInfo Hierarchy,
+            Result<PropertyInfo?> Info
+        )> propertyInfoWithErrors = context.SyntaxProvider.ForAttributeWithMetadataName(
+            "GodotUtils.InstanceResolver.ResolvableNodeAttribute",
+            static (node, _) => node is ClassDeclarationSyntax,
+            static (attrContext, token) =>
+            {
+                if (
+                    !attrContext.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
+                        LanguageVersion.CSharp8
+                    )
+                )
+                    return default;
+
+                INamedTypeSymbol typeSymbol = (INamedTypeSymbol)attrContext.TargetSymbol;
+                HierarchyInfo hierarchyInfo = HierarchyInfo.From(typeSymbol);
+
+                token.ThrowIfCancellationRequested();
+            }
+        );
+    }
+
+    public void Initialize_Prev(IncrementalGeneratorInitializationContext context)
+    {
         IncrementalValuesProvider<(
             HierarchyInfo Hierarchy,
             Result<PropertyInfo?> Info
@@ -25,19 +52,21 @@ public partial class ParameterGenerators : IIncrementalGenerator
                 static (node, _) =>
                     node
                         is VariableDeclaratorSyntax
-                    {
-                        Parent: VariableDeclarationSyntax
                         {
-                            Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax }
-                        }
-                    },
+                            Parent: VariableDeclarationSyntax
+                            {
+                                Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax }
+                            }
+                        },
                 static (context, token) =>
                 {
-                    if (!context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(LanguageVersion.CSharp8))
+                    if (
+                        !context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
+                            LanguageVersion.CSharp8
+                        )
+                    )
                         return default;
 
-                    FieldDeclarationSyntax fieldDeclaration = (FieldDeclarationSyntax)
-                        context.TargetNode.Parent!.Parent!;
                     IFieldSymbol fieldSymbol = (IFieldSymbol)context.TargetSymbol;
 
                     // Get the hierarchy info for the target symbol, and try to gather the property info

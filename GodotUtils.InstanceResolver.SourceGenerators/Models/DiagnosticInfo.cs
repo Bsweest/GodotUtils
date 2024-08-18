@@ -1,10 +1,10 @@
+using System.Collections.Immutable;
+using System.Linq;
 using GodotUtils.InstanceResolver.SourceGenerators.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Immutable;
-using System.Linq;
 
-namespace GodotUtils.InstanceResolver.SourceGenerators.Components;
+namespace GodotUtils.InstanceResolver.SourceGenerators.Models;
 
 internal sealed record DiagnosticInfo(
     DiagnosticDescriptor Descriptor,

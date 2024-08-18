@@ -1,7 +1,7 @@
-﻿namespace GodotUtils.InstanceResolver.UnitTests
+﻿namespace GodotUtils.InstanceResolver.UnitTests;
+
+[ResolvableNode]
+public partial class Generated : Godot.Node
 {
-    public partial class Generated : Godot.Node, IResolvableNode
-    {
-        public required Godot.HttpClient client;
-    }
+    private string value;
 }

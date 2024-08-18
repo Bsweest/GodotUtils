@@ -1,18 +1,12 @@
 ﻿using Godot;
-using GodotUtils.InstanceResolver.Internal;
-using static Godot.ResourceLoader;
+using GodotUtils.InstanceResolver.__Internal;
 
 namespace GodotUtils.InstanceResolver;
 
 public class PackedScene<TNode, TParams>(
     string path,
     string? typehint = null,
-    CacheMode cacheMode = CacheMode.Reuse
-)
+    ResourceLoader.CacheMode cacheMode = ResourceLoader.CacheMode.Reuse
+) : ResolvablePackedScene(path, typehint, cacheMode)
     where TNode : Node, IResolvableNode<TNode, TParams>
-    where TParams : IParametersBuilder<TNode>
-{
-    private readonly PackedScene _packedScene = Load<PackedScene>(path, typehint, cacheMode);
-
-    public PackedScene Value => _packedScene;
-}
+    where TParams : IParametersBuilder<TNode> { }

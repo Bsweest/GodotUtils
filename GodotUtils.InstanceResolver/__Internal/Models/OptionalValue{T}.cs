@@ -1,4 +1,4 @@
-﻿namespace GodotUtils.InstanceResolver.Internal.Models
+﻿namespace GodotUtils.InstanceResolver.__Internal.Models
 {
     public class OptionalValue<T>
     {
