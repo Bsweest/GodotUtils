@@ -1,8 +1,7 @@
-using GodotUtils.InstanceResolver.SourceGenerators.Components;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
 using static GodotUtils.InstanceResolver.SourceGenerators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -16,44 +15,48 @@ partial record HierarchyInfo
         BaseListSyntax? baseList = null
     )
     {
+        var className = Hierarchy[0].QualifiedName;
+        BaseTypeSyntax[] selectedInterfaces =
+            (expressionStatementSyntaxes.Length > 0)
+                ?
+                [
+                    SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
+                    SimpleBaseType(IdentifierName(HasParamsInterface))
+                ]
+                : [SimpleBaseType(IdentifierName(NoParamsInterface))];
+
         // Create the partial type declaration with the given member declarations.
         // This code produces a class declaration as follows:
         //
-        // partial <TYPE_KIND> TYPE_NAME>
+        // partial <TYPE_KIND> <TYPE_NAME>
         // {
         //      public class BuildParameters
         //      {
         //          <MEMBERS>
         //      }
         //
-        //      public void Map(BuildParameters parameters)...
+        //      public TNode Map(BuildParameters parameters)...
         // }
         TypeDeclarationSyntax typeDeclarationSyntax = (
             (ClassDeclarationSyntax)
                 Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
         )
-            .AddBaseListTypes(
-                SimpleBaseType(
-                    IdentifierName(RequiredResolveInterface(Hierarchy[0].QualifiedName))
-                )
-            )
+            .AddBaseListTypes(selectedInterfaces)
             .AddMembers(
                 ClassDeclaration(BuildParametersClassName)
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddBaseListTypes(
-                        SimpleBaseType(
-                            IdentifierName(RequiredParamsInterface(Hierarchy[0].QualifiedName))
-                        )
+                        SimpleBaseType(IdentifierName(RequiredParamsInterface(className)))
                     )
                     .AddMembers([.. memberDeclarations]),
-                MethodDeclaration(IdentifierName(BuildParametersClassName), Identifier("Map"))
+                MethodDeclaration(IdentifierName(className), Identifier(BuildFunctionConst.Name))
                     .AddModifiers(Token(SyntaxKind.PublicKeyword))
                     .AddParameterListParameters(
-                        Parameter(Identifier(PassingObj))
+                        Parameter(Identifier(BuildFunctionConst.PassingObj))
                             .WithType(IdentifierName(BuildParametersClassName))
                     )
                     .AddBodyStatements([.. expressionStatementSyntaxes])
-                    .AddBodyStatements(ReturnStatement(IdentifierName(PassingObj)))
+                    .AddBodyStatements(ReturnStatement(ThisExpression()))
             );
 
         // Add the base list, if present

@@ -10,7 +10,7 @@ partial class ParameterGenerators
         public static bool IsTargetTypeValid(IFieldSymbol fieldSymbol)
         {
             return fieldSymbol.ContainingType.ImplementsFromFullyQualifiedMetadataName(
-                    "GodotUtils.InstanceResolver.IHasParamsInstance"
+                    "GodotUtils.InstanceResolver.IResolvableNode"
                 )
                 && fieldSymbol.ContainingType.InheritsFromFullyQualifiedMetadataName("Godot.Node");
         }

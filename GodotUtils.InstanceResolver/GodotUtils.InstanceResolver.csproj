@@ -3,9 +3,10 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<WarningsAsErrors>Nullable</WarningsAsErrors>
 	</PropertyGroup>
 
-	<PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -23,12 +24,12 @@
 		<PackageReference Include="GodotSharp" Version="*" />
 	</ItemGroup>
 	
-	<ItemGroup>
-		<None Remove="LICENSE" Pack="true" PackagePath="\" />
-		<None Remove="README.md" Pack="true" PackagePath="\" />
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<None Update="LICENSE" Pack="true" PackagePath="\" />
+		<None Update="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<None Include="..\$(AssemblyName).SourceGenerators\bin\$(Configuration)\net8.0\$(AssemblyName).SourceGenerators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
 </Project>

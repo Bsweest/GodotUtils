@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Threading;
 using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Diagnostics;
 using GodotUtils.InstanceResolver.SourceGenerators.Extensions;
@@ -5,9 +8,6 @@ using GodotUtils.InstanceResolver.SourceGenerators.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.Threading;
 using static GodotUtils.InstanceResolver.SourceGenerators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -145,7 +145,7 @@ partial class ParameterGenerators
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     wrapperName,
-                                    IdentifierName(IsInitialized)
+                                    IdentifierName(BuildFunctionConst.IsInitialized)
                                 )
                             )
                         )
@@ -157,7 +157,7 @@ partial class ParameterGenerators
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             wrapperName,
-                            IdentifierName(GetValue)
+                            IdentifierName(BuildFunctionConst.GetValue)
                         )
                     )
                 );
@@ -168,10 +168,12 @@ partial class ParameterGenerators
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     wrapperName,
-                                    IdentifierName(SetValue)
+                                    IdentifierName(BuildFunctionConst.SetValue)
                                 )
                             )
-                            .AddArgumentListArguments(Argument(IdentifierName(ValueKeyword)))
+                            .AddArgumentListArguments(
+                                Argument(IdentifierName(BuildFunctionConst.ValueKeyword))
+                            )
                     )
                 );
             }
@@ -191,7 +193,7 @@ partial class ParameterGenerators
                     IdentifierName(info.FieldName),
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        IdentifierName(PassingObj),
+                        IdentifierName(BuildFunctionConst.PassingObj),
                         IdentifierName(info.PropertyName)
                     )
                 )
@@ -203,7 +205,7 @@ partial class ParameterGenerators
                     InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName(PassingObj),
+                            IdentifierName(BuildFunctionConst.PassingObj),
                             IdentifierName($"Is{info.PropertyName}Initialized")
                         )
                     ),
