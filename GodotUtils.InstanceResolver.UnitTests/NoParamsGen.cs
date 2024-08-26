@@ -2,9 +2,8 @@
 
 namespace GodotUtils.InstanceResolver.UnitTests
 {
-    [ResolvableNode]
     public partial class NoParamsGen : Node
     {
-        private int test;
+        public class Test() { }
     }
 }
