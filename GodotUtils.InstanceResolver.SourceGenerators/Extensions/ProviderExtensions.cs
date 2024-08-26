@@ -1,8 +1,8 @@
-using GodotUtils.InstanceResolver.SourceGenerators.Helper;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using GodotUtils.InstanceResolver.SourceGenerators.Helper;
+using Microsoft.CodeAnalysis;
 
 namespace GodotUtils.InstanceResolver.SourceGenerators.Extensions;
 
@@ -42,7 +42,10 @@ internal static class ProviderExtensions
                             map.Add(key, builder);
                         }
 
-                        builder.Add(element);
+                        if (element != null)
+                        {
+                            builder.Add(element);
+                        }
                     }
 
                     token.ThrowIfCancellationRequested();

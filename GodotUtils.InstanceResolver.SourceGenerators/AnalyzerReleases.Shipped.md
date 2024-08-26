@@ -7,4 +7,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|--------------------
-GDIR0001 | InstanceResolver.IResolvableNode | Error | GDIR0001_InstanceResolver
+GDIR0001 | InstanceResolver.ResolvableNode | Error | GDIR0001_InstanceResolver

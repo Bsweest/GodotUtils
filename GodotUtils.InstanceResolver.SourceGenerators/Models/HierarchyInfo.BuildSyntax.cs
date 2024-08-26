@@ -16,7 +16,6 @@ partial record HierarchyInfo
         BaseListSyntax? baseList = null
     )
     {
-        var className = Hierarchy[0].QualifiedName;
         // Create the partial type declaration with the given member declarations.
         // This code produces a class declaration as follows:
         //
@@ -29,30 +28,50 @@ partial record HierarchyInfo
         //
         //      public TNode Map(BuildParameters parameters)...
         // }
-        TypeDeclarationSyntax typeDeclarationSyntax = (
-            (ClassDeclarationSyntax)
-                Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
-        )
-            .AddBaseListTypes(
-                SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
-                SimpleBaseType(IdentifierName(HasParamsInterface))
+        TypeDeclarationSyntax typeDeclarationSyntax;
+
+        var className = Hierarchy[0].QualifiedName;
+
+        if (memberDeclarations.Length > 0)
+        {
+            typeDeclarationSyntax = (
+                (ClassDeclarationSyntax)
+                    Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
             )
-            .AddMembers(
-                ClassDeclaration(BuildParametersClassName)
-                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                    .AddBaseListTypes(
-                        SimpleBaseType(IdentifierName(RequiredParamsInterface(className)))
-                    )
-                    .AddMembers([.. memberDeclarations]),
-                MethodDeclaration(IdentifierName(className), Identifier(BuildFunctionConst.Name))
-                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                    .AddParameterListParameters(
-                        Parameter(Identifier(BuildFunctionConst.PassingObj))
-                            .WithType(IdentifierName(BuildParametersClassName))
-                    )
-                    .AddBodyStatements([.. expressionStatementSyntaxes])
-                    .AddBodyStatements(ReturnStatement(ThisExpression()))
+                .AddBaseListTypes(
+                    SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
+                    SimpleBaseType(IdentifierName(HasParamsInterface))
+                )
+                .AddMembers(
+                    ClassDeclaration(BuildParametersClassName)
+                        .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                        .AddBaseListTypes(
+                            SimpleBaseType(IdentifierName(RequiredParamsInterface(className)))
+                        )
+                        .AddMembers([.. memberDeclarations]),
+                    MethodDeclaration(
+                            IdentifierName(className),
+                            Identifier(BuildFunctionConst.Name)
+                        )
+                        .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                        .AddParameterListParameters(
+                            Parameter(Identifier(BuildFunctionConst.PassingObj))
+                                .WithType(IdentifierName(BuildParametersClassName))
+                        )
+                        .AddBodyStatements([.. expressionStatementSyntaxes])
+                        .AddBodyStatements(ReturnStatement(ThisExpression()))
+                );
+        }
+        else
+        {
+            typeDeclarationSyntax = (
+                (ClassDeclarationSyntax)
+                    Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
+            ).AddBaseListTypes(
+                SimpleBaseType(IdentifierName(NoRequiredResolveInterface(className))),
+                SimpleBaseType(IdentifierName(NoParamsInterface))
             );
+        }
 
         // Add the base list, if present
         if (baseList is not null)

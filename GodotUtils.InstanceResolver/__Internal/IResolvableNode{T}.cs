@@ -1,3 +1,6 @@
-﻿namespace GodotUtils.InstanceResolver.__Internal;
+﻿using Godot;
 
-public interface IResolvableNode<TNode> { }
+namespace GodotUtils.InstanceResolver.__Internal;
+
+public interface IResolvableNode<TNode>
+    where TNode : Node { }

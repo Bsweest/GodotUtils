@@ -15,111 +15,69 @@ public partial class ResolvableNodeGenerators : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        if (!System.Diagnostics.Debugger.IsAttached)
-            System.Diagnostics.Debugger.Launch();
-
         IncrementalValuesProvider<(
             HierarchyInfo Hierarchy,
-            Result<PropertyInfo?> Info
-        )> propertyInfoWithErrors = context.SyntaxProvider.ForAttributeWithMetadataName(
+            Result<ImmutableArray<PropertyInfo>> Info
+        )> classInfoWithErrors = context.SyntaxProvider.ForAttributeWithMetadataName(
             "GodotUtils.InstanceResolver.ResolvableNodeAttribute",
             static (node, _) => node is ClassDeclarationSyntax,
-            static (attrContext, token) =>
+            static (atx, token) =>
             {
                 if (
-                    !attrContext.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
+                    !atx.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
                         LanguageVersion.CSharp8
                     )
                 )
-                    return default;
+                    return default!;
 
-                INamedTypeSymbol typeSymbol = (INamedTypeSymbol)attrContext.TargetSymbol;
-                HierarchyInfo hierarchyInfo = HierarchyInfo.From(typeSymbol);
+                INamedTypeSymbol typeSymbol = (INamedTypeSymbol)atx.TargetSymbol;
+                Execute.TryGetClassInfo(typeSymbol, out var diagnostics);
 
-                token.ThrowIfCancellationRequested();
-            }
-        );
-    }
-
-    public void Initialize_Prev(IncrementalGeneratorInitializationContext context)
-    {
-        IncrementalValuesProvider<(
-            HierarchyInfo Hierarchy,
-            Result<PropertyInfo?> Info
-        )> propertyInfoWithErrors = context
-            .SyntaxProvider.ForAttributeWithMetadataName(
-                "GodotUtils.InstanceResolver.ParameterAttribute",
-                static (node, _) =>
-                    node
-                        is VariableDeclaratorSyntax
-                        {
-                            Parent: VariableDeclarationSyntax
-                            {
-                                Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax }
-                            }
-                        },
-                static (context, token) =>
-                {
-                    if (
-                        !context.SemanticModel.Compilation.HasLanguageVersionAtLeastEqualTo(
-                            LanguageVersion.CSharp8
+                var fields = typeSymbol
+                    .GetMembers()
+                    .Where(member =>
+                        member is IFieldSymbol field
+                        && field.HasAttributeWithFullyQualifiedMetadataName(
+                            "GodotUtils.InstanceResolver.ParameterAttribute"
                         )
                     )
-                        return default;
+                    .Cast<IFieldSymbol>();
 
-                    IFieldSymbol fieldSymbol = (IFieldSymbol)context.TargetSymbol;
+                token.ThrowIfCancellationRequested();
 
-                    // Get the hierarchy info for the target symbol, and try to gather the property info
-                    HierarchyInfo hierarchy = HierarchyInfo.From(fieldSymbol.ContainingType);
+                using var builder = ImmutableArrayBuilder<PropertyInfo>.Rent();
 
-                    token.ThrowIfCancellationRequested();
+                foreach (var field in fields)
+                {
+                    Execute.TryGetFieldInfo(field, token, out PropertyInfo? propertyInfo);
 
-                    _ = Execute.TryGetInfo(
-                        context.Attributes[0],
-                        fieldSymbol,
-                        token,
-                        out PropertyInfo? propertyInfo,
-                        out ImmutableArray<DiagnosticInfo> diagnostics
-                    );
+                    if (propertyInfo != null)
+                        builder.Add(propertyInfo);
 
                     token.ThrowIfCancellationRequested();
-
-                    return (
-                        Hierarchy: hierarchy,
-                        Info: new Result<PropertyInfo?>(propertyInfo, diagnostics)
-                    );
                 }
-            )
-            .Where(static item => item.Hierarchy is not null);
 
-        context.ReportDiagnostics(
-            propertyInfoWithErrors.Select(static (item, _) => item.Info.Errors)
+                return (
+                    HierarchyInfo.From(typeSymbol),
+                    new Result<ImmutableArray<PropertyInfo>>(builder.ToImmutable(), diagnostics)
+                );
+            }
         );
 
-        IncrementalValuesProvider<(
-            HierarchyInfo Hierarchy,
-            Result<PropertyInfo> Info
-        )> propertyInfo = propertyInfoWithErrors.Where(static item => item.Info.Value is not null)!;
-
-        IncrementalValuesProvider<(
-            HierarchyInfo Hierarchy,
-            EquatableArray<PropertyInfo> Properties
-        )> groupedPropertyInfo = propertyInfo.GroupBy(
-            static item => item.Left,
-            static item => item.Right.Value
-        );
+        context.ReportDiagnostics(classInfoWithErrors.Select(static (item, _) => item.Info.Errors));
+        var classInfo = classInfoWithErrors.Where(static item => item.Info.Errors.IsEmpty)!;
 
         context.RegisterSourceOutput(
-            groupedPropertyInfo,
+            classInfo,
             static (context, item) =>
             {
                 // Generate all member declarations for the current type
                 ImmutableArray<MemberDeclarationSyntax> memberDeclarations = item
-                    .Properties.SelectMany(Execute.GetPropertySyntax)
+                    .Info.Value.SelectMany(Execute.GetPropertySyntax)
                     .ToImmutableArray();
 
                 ImmutableArray<StatementSyntax> expressionStatementSyntaxes = item
-                    .Properties.Select(Execute.GetMapExpressionsSyntax)
+                    .Info.Value.Select(Execute.GetMapExpressionsSyntax)
                     .ToImmutableArray();
 
                 // Insert all members into the same partial type declaration

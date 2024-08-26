@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using GodotUtils.InstanceResolver.SourceGenerators.Components;
@@ -18,33 +19,12 @@ partial class ResolvableNodeGenerators
 {
     private static class Execute
     {
-        public static bool TryGetInfo(
-            AttributeData attributeData,
+        public static void TryGetFieldInfo(
             IFieldSymbol fieldSymbol,
             CancellationToken token,
-            out PropertyInfo? propertyInfo,
-            out ImmutableArray<DiagnosticInfo> diagnostics
+            [NotNullWhen(true)] out PropertyInfo? propertyInfo
         )
         {
-            using var builder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
-
-            if (!Validator.IsTargetTypeValid(fieldSymbol))
-            {
-                builder.Add(
-                    DiagnosticDescriptors.InvalidContainingTypeForParameterFieldError,
-                    fieldSymbol,
-                    fieldSymbol.ContainingType,
-                    fieldSymbol.Name
-                );
-
-                propertyInfo = null;
-                diagnostics = builder.ToImmutable();
-
-                return false;
-            }
-
-            token.ThrowIfCancellationRequested();
-
             string typeNameWithNullabilityAnnotations =
                 fieldSymbol.Type.GetFullyQualifiedNameWithNullabilityAnnotations();
             string fieldName = fieldSymbol.Name;
@@ -61,9 +41,28 @@ partial class ResolvableNodeGenerators
                 propertyName,
                 paramInfo
             );
-            diagnostics = builder.ToImmutable();
+        }
 
-            return true;
+        public static void TryGetClassInfo(
+            ITypeSymbol typeSymbol,
+            out ImmutableArray<DiagnosticInfo> diagnostics
+        )
+        {
+            using var builder = ImmutableArrayBuilder<DiagnosticInfo>.Rent();
+
+            if (!typeSymbol.InheritsFromFullyQualifiedMetadataName("Godot.Node"))
+            {
+                builder.Add(
+                    DiagnosticDescriptors.InvalidTypeForResolvableNodeError,
+                    typeSymbol,
+                    typeSymbol.Name
+                );
+
+                diagnostics = builder.ToImmutable();
+                return;
+            }
+
+            diagnostics = builder.ToImmutable();
         }
 
         private static string GetGeneratedPropertyName(IFieldSymbol fieldSymbol)

@@ -4,15 +4,15 @@ namespace GodotUtils.InstanceResolver.SourceGenerators.Diagnostics;
 
 internal static class DiagnosticDescriptors
 {
-    public static readonly DiagnosticDescriptor InvalidContainingTypeForParameterFieldError =
+    public static readonly DiagnosticDescriptor InvalidTypeForResolvableNodeError =
         new(
             id: "GDIR0001",
-            title: "Invalid containing type for [Parameter] field",
-            messageFormat: "The field {0}.{1} cannot be used to generate an build parameter property, as its containing type must inherit from Godot Node and use [IResolvableNode]",
+            title: "Invalid type for [ResolvableNode] attribute",
+            messageFormat: "The class {0} cannot be used to generate resolvable node class, as its type must inherit from Godot.Node",
             category: nameof(ResolvableNodeGenerators),
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Fields annotated with [Parameter] must be contained in a type that inherits Godot Node and implements [IResolvableNode].",
+            description: "Class annotated with [ResolvableNode] must inherit from Godot.Node.",
             helpLinkUri: ""
         );
 }
