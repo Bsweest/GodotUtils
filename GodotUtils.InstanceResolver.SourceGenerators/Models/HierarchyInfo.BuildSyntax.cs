@@ -39,8 +39,7 @@ partial record HierarchyInfo
                     Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
             )
                 .AddBaseListTypes(
-                    SimpleBaseType(IdentifierName(RequiredResolveInterface(className))),
-                    SimpleBaseType(IdentifierName(HasParamsInterface))
+                    SimpleBaseType(IdentifierName(RequiredResolveInterface(className)))
                 )
                 .AddMembers(
                     ClassDeclaration(BuildParametersClassName)
@@ -68,8 +67,7 @@ partial record HierarchyInfo
                 (ClassDeclarationSyntax)
                     Hierarchy[0].GetSyntax().AddModifiers(Token(SyntaxKind.PartialKeyword))
             ).AddBaseListTypes(
-                SimpleBaseType(IdentifierName(NoRequiredResolveInterface(className))),
-                SimpleBaseType(IdentifierName(NoParamsInterface))
+                SimpleBaseType(IdentifierName(NoRequiredResolveInterface(className)))
             );
         }
 

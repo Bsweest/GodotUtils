@@ -6,7 +6,7 @@ namespace GodotUtils.InstanceResolver.UnitTests;
 public partial class Generated : Godot.Node
 {
     [Parameter]
-    private string value;
+    private string value = "not required";
 
     [Parameter]
     private Vector2 pos;

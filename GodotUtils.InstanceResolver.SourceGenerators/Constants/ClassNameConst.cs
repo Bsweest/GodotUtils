@@ -8,8 +8,6 @@ internal static class ClassNameConst
     private const string optionalValue = "Models.OptionalValue";
 
     public const string BuildParametersClassName = "ParametersBuilder";
-    public const string HasParamsInterface = $"{internalNs}.IHasParametersInstance";
-    public const string NoParamsInterface = $"{internalNs}.INoParametersInstance";
 
     public static class BuildFunctionConst
     {
