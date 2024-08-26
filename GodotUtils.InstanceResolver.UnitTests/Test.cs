@@ -1,10 +1,7 @@
-﻿namespace TestNamespace
+﻿namespace GodotUtils.InstanceResolver.UnitTests
 {
-    public partial class Test
+    public class UnitTests
     {
-        public class Inside
-        {
-            public const string Z = "dsad";
-        }
+        public void InitPackedScene_Test() { }
     }
 }
