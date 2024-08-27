@@ -1,13 +1,14 @@
-﻿using Godot;
+﻿using System.Text.Json.Nodes;
+using Godot;
 
 namespace GodotUtils.InstanceResolver.UnitTests;
 
 [ResolvableNode]
-public partial class Generated : Godot.Node
+internal partial class HasParams : Node
 {
     [Parameter]
     private string value = "not required";
 
     [Parameter]
-    private Vector2 pos;
+    private JsonObject texture = null!;
 }
