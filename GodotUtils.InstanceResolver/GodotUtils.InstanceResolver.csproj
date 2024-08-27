@@ -32,8 +32,4 @@
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<None Include="..\$(AssemblyName).SourceGenerators\bin\$(Configuration)\net8.0\$(AssemblyName).SourceGenerators.dll" Pack="true" Visible="false" PackagePath="analyzers/dotnet/cs" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Injection\" />
-	</ItemGroup>
 </Project>

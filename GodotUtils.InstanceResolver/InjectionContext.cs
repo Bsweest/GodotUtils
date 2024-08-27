@@ -1,6 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using GodotUtils.InstanceResolver.Models;
 using static System.Linq.Expressions.Expression;
-using GDNode = Godot.Node;
 
 namespace GodotUtils.InstanceResolver;
 
@@ -9,29 +10,56 @@ namespace GodotUtils.InstanceResolver;
 /// </summary>
 public class InjectionContext
 {
-    private readonly Dictionary<Type, Action<GDNode, IDependencyProvider>> context = [];
+    private readonly Dictionary<Type, IStore> context = [];
 
-    public InjectionContext Register<T>()
-        where T : GDNode
+    internal Store<T> GetInject<T>()
+        where T : class
+    {
+        return (Store<T>)context[typeof(T)];
+    }
+
+    public InjectionContext Register<TDependency>()
+        where TDependency : class
     {
         var method =
-            typeof(T)
+            typeof(TDependency)
                 .GetMethods()
                 .Where(method => method.GetCustomAttribute<InjectAttribute>() != null)
                 .FirstOrDefault()
             ?? throw new MissingMethodException(
-                $"Could not find method that has attribute [Inject] in: {nameof(T)}"
+                $"Could not find method that has attribute [Inject] in: {nameof(TDependency)}"
             );
 
-        var nodeParam = Parameter(typeof(T), "node");
-        var providerParam = Parameter(typeof(IDependencyProvider), "provider");
+        var methodParamTypes = method.GetParameters().Select(param => param.ParameterType);
 
-        var expression = Lambda<Action<GDNode, IDependencyProvider>>(
-            Call(nodeParam, method, providerParam),
-            nodeParam,
-            providerParam
+        var nodeLamda = Parameter(typeof(TDependency), "node");
+        var providerLamda = Parameter(typeof(IDependencyProvider), "provider");
+
+        var expression = Lambda<Action<TDependency, IDependencyProvider>>(
+            Call(
+                nodeLamda,
+                method,
+                methodParamTypes.Select(param => GetServiceCall(providerLamda, param))
+            ),
+            nodeLamda,
+            providerLamda
+        );
+
+        context.Add(
+            typeof(TDependency),
+            new Store<TDependency> { InjectionMethod = expression.Compile() }
         );
 
         return this;
+    }
+
+    private MethodCallExpression GetServiceCall(ParameterExpression parameter, Type type)
+    {
+        return Call(
+            parameter,
+            typeof(IDependencyProvider)
+                .GetMethod(nameof(IDependencyProvider.Get))!
+                .MakeGenericMethod(type)
+        );
     }
 }

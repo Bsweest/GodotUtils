@@ -1,7 +1,3 @@
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Threading;
 using GodotUtils.InstanceResolver.SourceGenerators.Components;
 using GodotUtils.InstanceResolver.SourceGenerators.Diagnostics;
 using GodotUtils.InstanceResolver.SourceGenerators.Extensions;
@@ -10,6 +6,10 @@ using GodotUtils.InstanceResolver.SourceGenerators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Threading;
 using static GodotUtils.InstanceResolver.SourceGenerators.Constants.ClassNameConst;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -85,7 +85,17 @@ partial class ResolvableNodeGenerators
                 _ => null,
             };
 
-            return new(equalSyntax == null);
+            if (equalSyntax != null)
+            {
+                if (
+                    equalSyntax.Value is PostfixUnaryExpressionSyntax syntax && syntax.Kind() == SyntaxKind.SuppressNullableWarningExpression)
+                {
+                    return new(true);
+                }
+                return new(false);
+            }
+
+            return new(true);
         }
 
         public static MemberDeclarationSyntax[] GetPropertySyntax(PropertyInfo propertyInfo)
