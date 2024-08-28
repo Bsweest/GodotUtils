@@ -4,12 +4,12 @@ namespace GodotUtils.InstanceResolver.UnitTests
 {
     public class UnitTests
     {
-        public void InitPackedScene_Test() { }
+        //public void InitPackedScene_Test() { }
 
         [Fact]
         public void Injection_Implement_Test()
         {
-            var context = new InjectionContext().Register<Injection_Test>();
+            var context = new InjectionContext();
             var provider = new ServiceProvider();
 
             var resolver = new Resolver(context, provider);

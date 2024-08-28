@@ -1,5 +1,10 @@
 ﻿namespace GodotUtils.InstanceResolver;
 
+/// <summary>
+/// Scoped lifetime as your implement of <see cref="IDependencyProvider"></see>
+/// </summary>
+/// <param name="injectionContext"></param>
+/// <param name="provider"></param>
 public class Resolver(InjectionContext injectionContext, IDependencyProvider provider)
 {
     private readonly IDependencyProvider _provider = provider;

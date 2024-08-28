@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Nodes;
-using Godot;
+﻿using Godot;
 
 namespace GodotUtils.InstanceResolver.UnitTests;
 
@@ -10,5 +9,5 @@ internal partial class HasParams : Node
     private string value = "not required";
 
     [Parameter]
-    private JsonObject texture = null!;
+    private List<int> list = null!;
 }

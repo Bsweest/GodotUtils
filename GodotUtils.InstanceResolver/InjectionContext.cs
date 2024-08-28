@@ -12,19 +12,37 @@ public class InjectionContext
 {
     private readonly Dictionary<Type, IStore> context = [];
 
+    public InjectionContext()
+    {
+        var registerMethod = typeof(InjectionContext).GetMethod(
+            nameof(Register),
+            BindingFlags.NonPublic | BindingFlags.Instance
+        )!;
+
+        Assembly
+            .GetCallingAssembly()
+            .GetTypes()
+            .Where(type =>
+                type.GetMethods()
+                    .Any(method => method.GetCustomAttribute<InjectAttribute>() is not null)
+            )
+            .ToList()
+            .ForEach(type => registerMethod.MakeGenericMethod(type).Invoke(this, null));
+    }
+
     internal Store<T> GetInject<T>()
         where T : class
     {
         return (Store<T>)context[typeof(T)];
     }
 
-    public InjectionContext Register<TDependency>()
+    private void Register<TDependency>()
         where TDependency : class
     {
         var method =
             typeof(TDependency)
                 .GetMethods()
-                .Where(method => method.GetCustomAttribute<InjectAttribute>() != null)
+                .Where(method => method.GetCustomAttribute<InjectAttribute>() is not null)
                 .FirstOrDefault()
             ?? throw new MissingMethodException(
                 $"Could not find method that has attribute [Inject] in: {nameof(TDependency)}"
@@ -49,8 +67,6 @@ public class InjectionContext
             typeof(TDependency),
             new Store<TDependency> { InjectionMethod = expression.Compile() }
         );
-
-        return this;
     }
 
     private MethodCallExpression GetServiceCall(ParameterExpression parameter, Type type)

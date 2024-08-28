@@ -2,9 +2,7 @@
 
 namespace GodotUtils.InstanceResolver.UnitTests
 {
-    internal interface IInjectTest { }
-
-    internal class Injection_Test : IInjectTest
+    internal class Injection_Test
     {
         public FirstService _service1;
         public SecondService _service2;
