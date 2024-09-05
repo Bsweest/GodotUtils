@@ -1,8 +1,8 @@
-﻿using GodotUtils.InstanceResolver.UnitTests.Injection;
+﻿using GodotUtils.InstanceResolver.UnitTests.Models.Injection;
 
-namespace GodotUtils.InstanceResolver.UnitTests
+namespace GodotUtils.InstanceResolver.UnitTests.Models
 {
-    internal class Injection_Test
+    internal class UseMethodInjection
     {
         public FirstService _service1;
         public SecondService _service2;

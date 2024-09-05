@@ -1,4 +1,4 @@
-﻿namespace GodotUtils.InstanceResolver.UnitTests.Injection
+﻿namespace GodotUtils.InstanceResolver.UnitTests.Models.Injection
 {
     internal class ServiceProvider : IDependencyProvider
     {
