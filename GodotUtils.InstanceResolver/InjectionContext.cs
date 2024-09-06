@@ -1,7 +1,6 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using System.Reflection;
+using GodotUtils.InstanceResolver.Extensions;
 using GodotUtils.InstanceResolver.Models;
-using static System.Linq.Expressions.Expression;
 
 namespace GodotUtils.InstanceResolver;
 
@@ -12,54 +11,27 @@ public class InjectionContext
 {
     private readonly Dictionary<Type, IStore> context = [];
 
-    internal Store<T> GetInject<T>()
-        where T : class
+    public InjectionContext()
     {
-        return (Store<T>)context[typeof(T)];
-    }
+        Type genericStoreType = typeof(Store<>);
 
-    public InjectionContext Register<TDependency>()
-        where TDependency : class
-    {
-        var method =
-            typeof(TDependency)
-                .GetMethods()
-                .Where(method => method.GetCustomAttribute<InjectAttribute>() != null)
-                .FirstOrDefault()
-            ?? throw new MissingMethodException(
-                $"Could not find method that has attribute [Inject] in: {nameof(TDependency)}"
+        var hasInjectAttrTypes = Assembly
+            .GetCallingAssembly()
+            .GetTypes()
+            .Where(type =>
+                type.IsClass && type.GetMembers().Any(member => member.HasInjectAttribute())
             );
 
-        var methodParamTypes = method.GetParameters().Select(param => param.ParameterType);
-
-        var nodeLamda = Parameter(typeof(TDependency), "node");
-        var providerLamda = Parameter(typeof(IDependencyProvider), "provider");
-
-        var expression = Lambda<Action<TDependency, IDependencyProvider>>(
-            Call(
-                nodeLamda,
-                method,
-                methodParamTypes.Select(param => GetServiceCall(providerLamda, param))
-            ),
-            nodeLamda,
-            providerLamda
-        );
-
-        context.Add(
-            typeof(TDependency),
-            new Store<TDependency> { InjectionMethod = expression.Compile() }
-        );
-
-        return this;
+        foreach (Type nodeType in hasInjectAttrTypes)
+        {
+            Type storeType = genericStoreType.MakeGenericType(nodeType);
+            context.Add(nodeType, (IStore)Activator.CreateInstance(storeType)!);
+        }
     }
 
-    private MethodCallExpression GetServiceCall(ParameterExpression parameter, Type type)
+    internal IStore? GetInjection(Type nodeType)
     {
-        return Call(
-            parameter,
-            typeof(IDependencyProvider)
-                .GetMethod(nameof(IDependencyProvider.Get))!
-                .MakeGenericMethod(type)
-        );
+        context.TryGetValue(nodeType, out var store);
+        return store;
     }
 }

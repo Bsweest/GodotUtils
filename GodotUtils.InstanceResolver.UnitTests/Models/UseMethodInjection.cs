@@ -1,10 +1,9 @@
-﻿using GodotUtils.InstanceResolver.UnitTests.Injection;
+﻿using Godot;
+using GodotUtils.InstanceResolver.UnitTests.Models.Injection;
 
-namespace GodotUtils.InstanceResolver.UnitTests
+namespace GodotUtils.InstanceResolver.UnitTests.Models
 {
-    internal interface IInjectTest { }
-
-    internal class Injection_Test : IInjectTest
+    internal partial class UseMethodInjection : Node
     {
         public FirstService _service1;
         public SecondService _service2;
