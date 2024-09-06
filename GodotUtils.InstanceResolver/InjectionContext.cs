@@ -13,23 +13,25 @@ public class InjectionContext
 
     public InjectionContext()
     {
-        var store = typeof(Store<>);
+        Type genericStoreType = typeof(Store<>);
 
         var hasInjectAttrTypes = Assembly
             .GetCallingAssembly()
             .GetTypes()
-            .Where(type => type.GetMembers().Any(member => member.HasInjectAttribute()));
+            .Where(type =>
+                type.IsClass && type.GetMembers().Any(member => member.HasInjectAttribute())
+            );
 
-        foreach (var nodeType in hasInjectAttrTypes)
+        foreach (Type nodeType in hasInjectAttrTypes)
         {
-            var storeType = store.MakeGenericType(nodeType);
+            Type storeType = genericStoreType.MakeGenericType(nodeType);
             context.Add(nodeType, (IStore)Activator.CreateInstance(storeType)!);
         }
     }
 
-    internal Store<T> GetInjection<T>()
-        where T : class
+    internal IStore? GetInjection(Type nodeType)
     {
-        return (Store<T>)context[typeof(T)];
+        context.TryGetValue(nodeType, out var store);
+        return store;
     }
 }

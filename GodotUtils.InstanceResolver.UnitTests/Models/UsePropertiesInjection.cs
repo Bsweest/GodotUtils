@@ -1,8 +1,9 @@
-﻿using GodotUtils.InstanceResolver.UnitTests.Models.Injection;
+﻿using Godot;
+using GodotUtils.InstanceResolver.UnitTests.Models.Injection;
 
 namespace GodotUtils.InstanceResolver.UnitTests.Models
 {
-    internal class UsePropertiesInjection
+    internal partial class UsePropertiesInjection : Node
     {
         [Inject]
         public FirstService _service1;

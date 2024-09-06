@@ -1,4 +1,6 @@
-﻿namespace GodotUtils.InstanceResolver;
+﻿using Godot;
+
+namespace GodotUtils.InstanceResolver;
 
 /// <summary>
 /// Scoped lifetime with your implement of <see cref="IDependencyProvider"></see>
@@ -11,9 +13,15 @@ public class Resolver(InjectionContext injectionContext, IDependencyProvider pro
     private readonly InjectionContext _injectionContext = injectionContext;
 
     public TNode Inject<TNode>(TNode node)
-        where TNode : class
+        where TNode : Node
     {
-        _injectionContext.GetInjection<TNode>().Inject(node, _provider);
+        _injectionContext.GetInjection(node.GetType())?.Inject(node, _provider);
+
+        foreach (var child in node.GetChildren())
+        {
+            Inject(child);
+        }
+
         return node;
     }
 }

@@ -3,11 +3,16 @@
 namespace GodotUtils.InstanceResolver.UnitTests;
 
 [ResolvableNode]
-internal partial class HasParams : Node
+public partial class Bullet : RigidBody2D
 {
     [Parameter]
-    private string value = "not required";
+    private int _damage;
 
     [Parameter]
-    private List<int> list = null!;
+    private int _speed = 100;
+
+    [Parameter]
+    private Texture _texture = null!;
+
+    // game logic...
 }

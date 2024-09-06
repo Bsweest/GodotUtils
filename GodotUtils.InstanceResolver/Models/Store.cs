@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
+using Godot;
 using GodotUtils.InstanceResolver.Extensions;
 using static System.Linq.Expressions.Expression;
 
 namespace GodotUtils.InstanceResolver.Models;
 
-internal interface IStore { }
-
 internal class Store<TNode> : IStore
+    where TNode : Node
 {
     private readonly Type _nodeType;
     private readonly List<Action<TNode, IDependencyProvider>> injectionMethods = [];
@@ -18,10 +18,9 @@ internal class Store<TNode> : IStore
         RegisterFieldsAndProperties();
     }
 
-    public TNode Inject(TNode node, IDependencyProvider provider)
+    public void Inject(Node node, IDependencyProvider provider)
     {
-        injectionMethods.ForEach(mapAction => mapAction.Invoke(node, provider));
-        return node;
+        injectionMethods.ForEach(mapAction => mapAction.Invoke((TNode)node, provider));
     }
 
     private void RegisterMethod()
@@ -36,7 +35,7 @@ internal class Store<TNode> : IStore
 
         var methodParamTypes = method.GetParameters().Select(param => param.ParameterType);
 
-        var node = Parameter(typeof(TNode), "node");
+        var node = Parameter(_nodeType, "node");
         var provider = Parameter(typeof(IDependencyProvider), "provider");
 
         var expression = Lambda<Action<TNode, IDependencyProvider>>(
@@ -50,7 +49,7 @@ internal class Store<TNode> : IStore
 
     private void RegisterFieldsAndProperties()
     {
-        var node = Parameter(typeof(TNode), "node");
+        var node = Parameter(_nodeType, "node");
         var provider = Parameter(typeof(IDependencyProvider), "provider");
 
         injectionMethods.AddRange(
